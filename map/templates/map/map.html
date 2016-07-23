@@ -9,6 +9,28 @@
         
         <div id='stopMap' style='width: 100vw; height: 100vh;'></div>
         <script type='text/javascript'>
+           function get_pushpin_from_fort(fort) {
+               var pushpin = undefined;
+               if (fort["gymteam"] !== null) {
+                   pushpin = new Microsoft.Maps.Pushpin(
+                           new Microsoft.Maps.Location(fort["latitude"], fort["longitude"]), 
+                           { icon: 'https://s3-us-west-2.amazonaws.com/pokemon-map/icons/pharmacy-icon' + fort["gymteam"] + '.png',
+                             height: 39,
+                             width: 25,
+                             anchor: new Microsoft.Maps.Point(12, 25) });
+               }
+               else {
+                   pushpin = new Microsoft.Maps.Pushpin(
+                           new Microsoft.Maps.Location(fort["latitude"], fort["longitude"]), 
+                           { icon: 'https://s3-us-west-2.amazonaws.com/pokemon-map/icons/pokestop.png',
+                             height: 10,
+                             width: 10,
+                             anchor: new Microsoft.Maps.Point(0, 0) });
+               }
+               return pushpin
+           }
+
+
             function loadMapScenario() {
                 // init map
                 var map = new Microsoft.Maps.Map(document.getElementById('stopMap'), {
@@ -26,54 +48,57 @@
                   }
                   navigator.geolocation.getCurrentPosition(set_initial_view);
                 }
-                
-                // Query pokemon stops
-                bounds = map.getBounds()
-                northWest = bounds.getNorthwest()
-                southEast = bounds.getSoutheast()
 
-                console.log(northWest.latitude)
-                console.log(northWest.longitude)
+                function update_map(map) {
+                    function clear_pushpins(map) {
+                        for (var i = map.entities.getLength() - 1; i >= 0; i--) {
+                            var pushpin = map.entities.get(i);
+                            if (pushpin instanceof Microsoft.Maps.Pushpin) {
+                                map.entities.removeAt(i);
+                            }
+                        }
+                    }
 
-                var xhttp = new XMLHttpRequest()
-                query_url = ("/query?" + "west=" + northWest.longitude
-                           + "&north=" + northWest.latitude
-                           + "&east=" + southEast.longitude
-                           + "&south=" + southEast.latitude);
-                xhttp.open("GET", query_url, false);
-                xhttp.send();
-                fort_list = JSON.parse(xhttp.responseText);
-             
-                var stop_pin_list = [];
-                var gym_pin_list = []; 
-                for (var i in fort_list) {
-                   var fort = fort_list[i];
-                   if (fort["latitude"] === undefined) {
-                        continue;
-                   }
-                   var pushpin = new Microsoft.Maps.Pushpin(
-                           new Microsoft.Maps.Location(fort["latitude"], fort["longitude"]), 
-                           { icon: 'https://www.bingmapsportal.com/Content/images/poi_custom.png',
-                             anchor: new Microsoft.Maps.Point(12, 25) });
-                   if (fort["gymteam"] === 1) {
-                        gym_pin_list.push(pushpin)
-                   }
-                   else {
-                        stop_pin_list.push(pushpin)
-                   }
+
+                    // Query pokemon stops
+                    bounds = map.getBounds()
+                    northWest = bounds.getNorthwest()
+                    southEast = bounds.getSoutheast()
+
+                    var xhttp = new XMLHttpRequest()
+                    xhttp.onreadystatechange = function() {
+                      if (xhttp.readyState == 4 && xhttp.status == 200) {
+                        clear_pushpins(map)
+
+                        fort_list = JSON.parse(xhttp.responseText);
+                        for (var i in fort_list) {
+                           var fort = fort_list[i];
+                           if (fort["latitude"] === undefined) {
+                                continue;
+                           }
+                           var pushpin = get_pushpin_from_fort(fort)
+                           map.entities.push(pushpin)
+                        }
+                      }
+                    };
+                    query_url = ("/query?" + "west=" + northWest.longitude
+                               + "&north=" + northWest.latitude
+                               + "&east=" + southEast.longitude
+                               + "&south=" + southEast.latitude);
+                    xhttp.open("GET", query_url, false);
+                    xhttp.send();
                 }
 
+                update_map(map)
 
-                var layer = new Microsoft.Maps.Layer();
-                layer.add(gym_pin_list);
-                map.layers.insert(layer);
-
-
-                // Add related pushpins
-
+                // Update the view changed counter after 2 seconds each time
+                Microsoft.Maps.Events.addThrottledHandler(map, 'viewchangeend', function () {
+                    update_map(map)
+                }, 1000);
             }
         </script>
         <script type='text/javascript' src='http://www.bing.com/api/maps/mapcontrol?branch=release&callback=loadMapScenario' async defer></script>
+        <div>Icons made by <a href="http://www.freepik.com" title="Freepik">Freepik</a> from <a href="http://www.flaticon.com" title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div>
 
     </body>
 </html>
