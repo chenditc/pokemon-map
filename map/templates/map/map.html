@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Pokemon Stop Map</title>
+        <meta http-equiv='Content-Type' content='text/html; charset=utf-8'/>
+    </head>
+    <body>
+        <div id='printoutPanel'></div>
+        
+        <div id='stopMap' style='width: 100vw; height: 100vh;'></div>
+        <script type='text/javascript'>
+            function loadMapScenario() {
+                // init map
+                var map = new Microsoft.Maps.Map(document.getElementById('stopMap'), {
+                    credentials: 'AjDchhYNn7_bhP8UG8iRnhGEk3gq4wl7hxkORwk3eJa9HWFONQERXGMglVEQ0pPw'
+                });
+                map.setView({zoom: 15});
+
+                // Change initial view if possible
+                if (navigator.geolocation) {
+                  function set_initial_view(position) {
+                    map.setView({
+                        center: new Microsoft.Maps.Location(position.coords.latitude, position.coords.longitude),
+                        zoom: 15
+                    });
+                  }
+                  navigator.geolocation.getCurrentPosition(set_initial_view);
+                }
+                
+                // Query pokemon stops
+                bounds = map.getBounds()
+                northWest = bounds.getNorthwest()
+                southEast = bounds.getSoutheast()
+
+                console.log(northWest.latitude)
+                console.log(northWest.longitude)
+
+                var xhttp = new XMLHttpRequest()
+                query_url = ("/query?" + "west=" + northWest.longitude
+                           + "&north=" + northWest.latitude
+                           + "&east=" + southEast.longitude
+                           + "&south=" + southEast.latitude);
+                xhttp.open("GET", query_url, false);
+                xhttp.send();
+                fort_list = JSON.parse(xhttp.responseText);
+             
+                var stop_pin_list = [];
+                var gym_pin_list = []; 
+                for (var i in fort_list) {
+                   var fort = fort_list[i];
+                   if (fort["latitude"] === undefined) {
+                        continue;
+                   }
+                   var pushpin = new Microsoft.Maps.Pushpin(
+                           new Microsoft.Maps.Location(fort["latitude"], fort["longitude"]), 
+                           { icon: 'https://www.bingmapsportal.com/Content/images/poi_custom.png',
+                             anchor: new Microsoft.Maps.Point(12, 25) });
+                   if (fort["gymteam"] === 1) {
+                        gym_pin_list.push(pushpin)
+                   }
+                   else {
+                        stop_pin_list.push(pushpin)
+                   }
+                }
+
+
+                var layer = new Microsoft.Maps.Layer();
+                layer.add(gym_pin_list);
+                map.layers.insert(layer);
+
+
+                // Add related pushpins
+
+            }
+        </script>
+        <script type='text/javascript' src='http://www.bing.com/api/maps/mapcontrol?branch=release&callback=loadMapScenario' async defer></script>
+
+    </body>
+</html>
