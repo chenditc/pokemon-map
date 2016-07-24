@@ -34,31 +34,35 @@
             function loadMapScenario() {
                 // init map
                 var map = new Microsoft.Maps.Map(document.getElementById('stopMap'), {
-                    credentials: 'AjDchhYNn7_bhP8UG8iRnhGEk3gq4wl7hxkORwk3eJa9HWFONQERXGMglVEQ0pPw'
+                    credentials: 'AjDchhYNn7_bhP8UG8iRnhGEk3gq4wl7hxkORwk3eJa9HWFONQERXGMglVEQ0pPw',
+                    enableClickableLogo: false,
+                    enableSearchLogo: false,
+                    showDashboard: false,
+                    tileBuffer: 4,
+                    useInertia: false,
+                    showMapTypeSelector: false,
                 });
-                map.setView({zoom: 15});
+                if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|BB|PlayBook|IEMobile|Windows Phone|Kindle|Silk|Opera Mini/i.test(navigator.userAgent)) {
+                    map.setView({zoom: 17});
+                }
+                else {
+                    map.setView({zoom: 15});
+                }
 
                 // Change initial view if possible
                 if (navigator.geolocation) {
                   function set_initial_view(position) {
                     map.setView({
                         center: new Microsoft.Maps.Location(position.coords.latitude, position.coords.longitude),
-                        zoom: 15
                     });
                   }
                   navigator.geolocation.getCurrentPosition(set_initial_view);
                 }
+                else {
+
+                }
 
                 function update_map(map) {
-                    function clear_pushpins(map) {
-                        for (var i = map.entities.getLength() - 1; i >= 0; i--) {
-                            var pushpin = map.entities.get(i);
-                            if (pushpin instanceof Microsoft.Maps.Pushpin) {
-                                map.entities.removeAt(i);
-                            }
-                        }
-                    }
-
 
                     // Query pokemon stops
                     bounds = map.getBounds()
@@ -68,8 +72,8 @@
                     var xhttp = new XMLHttpRequest()
                     xhttp.onreadystatechange = function() {
                       if (xhttp.readyState == 4 && xhttp.status == 200) {
-                        clear_pushpins(map)
-
+                        var layer = new Microsoft.Maps.Layer();
+                        // parse forts to pins
                         fort_list = JSON.parse(xhttp.responseText);
                         for (var i in fort_list) {
                            var fort = fort_list[i];
@@ -77,8 +81,12 @@
                                 continue;
                            }
                            var pushpin = get_pushpin_from_fort(fort)
-                           map.entities.push(pushpin)
+                           layer.add(pushpin)
                         }
+
+                        // Update map with latest pins
+                        map.layers.clear();
+                        map.layers.insert(layer);
                       }
                     };
                     query_url = ("/query?" + "west=" + northWest.longitude
@@ -89,12 +97,10 @@
                     xhttp.send();
                 }
 
-                update_map(map)
-
                 // Update the view changed counter after 2 seconds each time
                 Microsoft.Maps.Events.addThrottledHandler(map, 'viewchangeend', function () {
                     update_map(map)
-                }, 1000);
+                }, 2000);
             }
         </script>
         <script type='text/javascript' src='http://www.bing.com/api/maps/mapcontrol?branch=release&callback=loadMapScenario' async defer></script>

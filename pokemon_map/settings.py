@@ -25,12 +25,10 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 if os.environ.get('ENV') == "DEV":
     DEBUG = True
+    ALLOWED_HOSTS = []
 else:
     DEBUG = False
-
-
-ALLOWED_HOSTS = []
-
+    ALLOWED_HOSTS = ["*.mypokemon.io", "mypokemon.io"]
 
 # Application definition
 
