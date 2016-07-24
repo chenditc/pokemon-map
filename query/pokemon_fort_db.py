@@ -75,6 +75,7 @@ class PokemonFortDB(object):
                     " WHERE map_visit_record.timestamp > %s" +  # Visited last hour
                         " AND map_search_record.timestamp < %s" +   # Didn't update last minute
                         " AND map_search_record.cellid = map_visit_record.cellid " +
+                    " ORDER BY map_visit_record.timestamp DESC" + 
                     " LIMIT %s", (now - 3600, now - 60, limit))
         rows = cur.fetchall()
         result = [ int(row[0]) for row in rows ]
