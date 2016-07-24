@@ -22,9 +22,9 @@
                else {
                    pushpin = new Microsoft.Maps.Pushpin(
                            new Microsoft.Maps.Location(fort["latitude"], fort["longitude"]), 
-                           { icon: 'https://s3-us-west-2.amazonaws.com/pokemon-map/icons/pokestop.png',
-                             height: 10,
-                             width: 10,
+                           { icon: 'https://s3-us-west-2.amazonaws.com/pokemon-map/icons/pokeball.png',
+                             height: 20,
+                             width: 20,
                              anchor: new Microsoft.Maps.Point(0, 0) });
                }
                return pushpin
@@ -85,7 +85,7 @@
                                + "&north=" + northWest.latitude
                                + "&east=" + southEast.longitude
                                + "&south=" + southEast.latitude);
-                    xhttp.open("GET", query_url, false);
+                    xhttp.open("GET", query_url, true);
                     xhttp.send();
                 }
 
