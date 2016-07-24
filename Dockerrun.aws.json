@@ -10,10 +10,6 @@
     }
   ],
   "Volumes": [
-    {
-      "HostDirectory": "/var/log/django",
-      "ContainerDirectory": "/var/log/django"
-    }
   ],
   "Logging": "/var/log/django"
 }
