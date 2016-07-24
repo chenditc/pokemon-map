@@ -20,4 +20,5 @@ urlpatterns = [
     url(r'^query/', include('query.urls')),
     url(r'^map/', include('map.urls')),
     url(r'^admin/', admin.site.urls),
+    url(r'^', include('map.urls')),        # Map default traffice to map
 ]
