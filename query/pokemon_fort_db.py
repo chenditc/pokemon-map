@@ -96,16 +96,13 @@ class PokemonFortDB(object):
 
 
     def query_forts(self, west, north, east, south):
-        self.add_map_visit_record(west, north, east, south)
-
         cur = self.conn.cursor()
-        cur.execute("SELECT latitude, longitude, forttype, gymteam FROM fort_map " + 
+        cur.execute("SELECT latitude, longitude, forttype, lure_expire, gymteam FROM fort_map " + 
                     "WHERE longitude > %s " + 
                         "and longitude < %s " + 
                         "and latitude > %s " + 
                         "and latitude < %s " +
-                     "ORDER BY fortid limit 200",
-#                    "ORDER BY RANDOM() limit 200", 
+                     "ORDER BY lure_expire, fortid limit 200",
                 (west, east, south, north))
         rows = cur.fetchall()
         forts = []
@@ -113,38 +110,10 @@ class PokemonFortDB(object):
             forts.append({ "latitude": row[0],
                               "longitude" : row[1],
                               "forttype" : row[2],
-                              "gymteam" : row[3]
+                              "lure_expire" : row[3],
+                              "gymteam" : row[4]
                             })
         return forts
-
-    def add_map_visit_record(self, west, north, east, south):
-        # Only add when area is smaller than 0.85 / 1000 / 1000
-        p1 = s2sphere.LatLng.from_degrees(north, west); 
-        p2 = s2sphere.LatLng.from_degrees(south, east);
-        rect = s2sphere.LatLngRect.from_point_pair(p1, p2)
-        area = rect.area() * 1000 * 1000
-        if area > 0.85:
-            return
-
-        cover = s2sphere.RegionCoverer()
-        cover.max_cells = 10000
-        cover.max_level = 15
-        cover.min_level = 15
-        cells = cover.get_covering(rect)
-
-        now = time.time()
-        cur = self.conn.cursor()
-
-        for cell in cells: 
-            cur.execute("INSERT INTO map_visit_record (timestamp, cellid)" +  
-                        " VALUES (%s, %s)", (now, cell.id()))
-            cur.execute("INSERT INTO map_search_record (timestamp, cellid)" +  
-                        " VALUES (%s, %s) " +
-                        " ON CONFLICT (cellid) DO NOTHING ", (0, cell.id()))
-        self.conn.commit()
-        return
-
-
 
 ############################################################################################################
 # utility
