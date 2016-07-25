@@ -36,7 +36,7 @@ class PokemonFortDB(object):
         return forts
 
     def query_pokemon(self, west, north, east, south):
-        now = time.time()
+        now = time.time() * 1000
         cur = self.conn.cursor()
         cur.execute("SELECT latitude, longitude, pokemon_id, expire FROM pokemon_map " + 
                     "WHERE longitude > %s " + 
