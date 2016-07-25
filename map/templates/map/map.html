@@ -10,24 +10,27 @@
         <div id='stopMap' style='width: 100vw; height: 100vh;'></div>
         <script type='text/javascript'>
             var now_time = (new Date).getTime() / 1000;
-            function get_pushpin_from_fort(fort) {
+            function get_pushpin_from_map_item(map_item) {
                 var icon_url = undefined;
-                if (fort["gymteam"] !== null) {
-                    icon_url = 'https://s3-us-west-2.amazonaws.com/pokemon-map/icons/pharmacy-icon' + fort["gymteam"] + '.png';
+                if (map_item['pokemon_id'] !== undefined) {
+                    icon_url = 'https://s3-us-west-2.amazonaws.com/pokemon-map/icons/pokemon/' + map_item['pokemon_id'] + '.png';
+
                 }
-                else if (fort['lure'] > now_time) {
+                else if (map_item["gymteam"] !== null) {
+                    icon_url = 'https://s3-us-west-2.amazonaws.com/pokemon-map/icons/pharmacy-icon' + map_item["gymteam"] + '.png';
+                }
+                else if (map_item['lure'] > now_time) {
                          icon_url = 'https://s3-us-west-2.amazonaws.com/pokemon-map/icons/pokeball_lure.png';
                 }
                 else {
                      icon_url = 'https://s3-us-west-2.amazonaws.com/pokemon-map/icons/pokeball.png';
                 }
                 var pushpin = new Microsoft.Maps.Pushpin(
-                            new Microsoft.Maps.Location(fort["latitude"], fort["longitude"]), 
+                            new Microsoft.Maps.Location(map_item["latitude"], map_item["longitude"]), 
                             { icon: icon_url,
                               anchor: new Microsoft.Maps.Point(0, 0) });
                 return pushpin
             }
-
 
             function loadMapScenario() {
                 // init map
@@ -71,14 +74,14 @@
                     xhttp.onreadystatechange = function() {
                       if (xhttp.readyState == 4 && xhttp.status == 200) {
                         var layer = new Microsoft.Maps.Layer();
-                        // parse forts to pins
-                        fort_list = JSON.parse(xhttp.responseText);
-                        for (var i in fort_list) {
-                           var fort = fort_list[i];
-                           if (fort["latitude"] === undefined) {
+                        // parse map items to pins
+                        item_list = JSON.parse(xhttp.responseText);
+                        for (var i in item_list) {
+                           var item = item_list[i];
+                           if (item["latitude"] === undefined) {
                                 continue;
                            }
-                           var pushpin = get_pushpin_from_fort(fort)
+                           var pushpin = get_pushpin_from_map_item(item)
                            layer.add(pushpin)
                         }
 
@@ -87,7 +90,7 @@
                         map.layers.insert(layer);
                       }
                     };
-                    query_url = ("/query?" + "west=" + northWest.longitude
+                    query_url = ("/query/pokemon?" + "west=" + northWest.longitude
                                + "&north=" + northWest.latitude
                                + "&east=" + southEast.longitude
                                + "&south=" + southEast.latitude);

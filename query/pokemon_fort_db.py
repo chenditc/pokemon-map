@@ -38,7 +38,7 @@ class PokemonFortDB(object):
     def query_pokemon(self, west, north, east, south):
         now = time.time()
         cur = self.conn.cursor()
-        cur.execute("SELECT latitude, longitude, pokemon_id, expire FROM fort_map " + 
+        cur.execute("SELECT latitude, longitude, pokemon_id, expire FROM pokemon_map " + 
                     "WHERE longitude > %s " + 
                         "and longitude < %s " + 
                         "and latitude > %s " + 
@@ -47,12 +47,11 @@ class PokemonFortDB(object):
                      "ORDER BY encounter_id DESC limit 200",
                 (west, east, south, north, now))
         rows = cur.fetchall()
-        forts = []
+        pokemons = []
         for row in rows:
-            forts.append({ "latitude": row[0],
+            pokemons.append({ "latitude": row[0],
                               "longitude" : row[1],
                               "pokemon_id" : row[2],
                               "expire" : row[3]
                             })
-
-select * from pokemon_map WHERE expire > 1469407693 ORDER BY encounter_id DESC limit 10;
+        return pokemons
