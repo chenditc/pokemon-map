@@ -3,13 +3,7 @@
 <head>
    <title>mypokemon.io -- Your Pokemon Map</title>
    <meta http-equiv='Content-Type' content='text/html; charset=utf-8'/>
-   <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
-   <script>
-(adsbygoogle = window.adsbygoogle || []).push({
-         google_ad_client: "ca-pub-7776910507991738",
-             enable_page_level_ads: true
-               });
-   </script>
+
 
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -45,6 +39,7 @@
 </head>
 <body>
 
+
 <div class="container-fluid">
   <div class="row content">
     <div class="col-sm-3 sidenav">
@@ -53,6 +48,7 @@
       <ul class="nav nav-pills nav-stacked">
         <li><button class="btn btn-default" onclick="query_pokemon()">Pokemon</button></li>
         <li><button class="btn btn-default" onclick="query_fort()">Pokestop and Gym</li>
+        <li><button id="showExpireButton" class="btn btn-default" onclick="toggle_show_expire()">Show Expire Time</li>
       </ul><br>
     </div>
 
@@ -66,13 +62,17 @@
         <script type='text/javascript'>
             var query_type = "pokemon"
             var map = undefined
+            var show_expire = false
 
             var now_time = (new Date).getTime() / 1000;
             function get_pushpin_from_map_item(map_item) {
                 var icon_url = undefined;
+                var title = "";
                 if (map_item['pokemon_id'] !== undefined) {
                     icon_url = 'https://s3-us-west-2.amazonaws.com/pokemon-map/icons/pokemon/' + map_item['pokemon_id'] + '.png';
-
+                    if (show_expire) {
+                        title = (new Date(map_item['expire'])).toLocaleTimeString('en-GB')
+                    }
                 }
                 else if (map_item["gymteam"] !== null) {
                     icon_url = 'https://s3-us-west-2.amazonaws.com/pokemon-map/icons/pharmacy-icon' + map_item["gymteam"] + '.png';
@@ -86,6 +86,7 @@
                 var pushpin = new Microsoft.Maps.Pushpin(
                             new Microsoft.Maps.Location(map_item["latitude"], map_item["longitude"]), 
                             { icon: icon_url,
+                              title: title,
                               anchor: new Microsoft.Maps.Point(0, 0) });
                 return pushpin
             }
@@ -172,10 +173,44 @@
                 query_type= "fort"
                 update_map();
             }
+            function toggle_show_expire() {
+                show_expire = (show_expire === false);
+                update_map();
+            }
 
         </script>
         <script type='text/javascript' src='http://www.bing.com/api/maps/mapcontrol?branch=release&callback=loadMapScenario' async defer></script>
+
+    <!-- google ads -->
+
+    <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+    <!-- pokemon1 -->
+    <ins class="adsbygoogle"
+         style="display:inline-block;width:728px;height:90px"
+         data-ad-client="ca-pub-7776910507991738"
+         data-ad-slot="1980325006"></ins>
+    <script>
+    (adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
+
+    <!-- google analytics -->
+
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-78900217-2', 'auto');
+      ga('send', 'pageview');
+
+    </script>
+
+    <!-- copyright -->
+
         <div>Icons made by <a href="http://www.freepik.com" title="Freepik">Freepik</a> from <a href="http://www.flaticon.com" title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div>
+
+
 
 <footer class="container-fluid">
   <p></p>
