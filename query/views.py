@@ -10,7 +10,7 @@ import redis
 import pokemon_fort_db
 
 db = pokemon_fort_db.PokemonFortDB()
-work_queue = boto3.resource('sqs').get_queue_by_name(QueueName='awseb-e-h66tqvpuym-stack-AWSEBWorkerQueue-1X04PKYR2KY9D')
+work_queue = boto3.resource('sqs', region_name='us-west-2').get_queue_by_name(QueueName='awseb-e-h66tqvpuym-stack-AWSEBWorkerQueue-1X04PKYR2KY9D')
 redis_client = redis.StrictRedis(host='mypokemon-io.qha7wz.ng.0001.usw2.cache.amazonaws.com', port=6379, db=0)
 
 def refresh_cells(cell_ids):
