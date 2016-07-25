@@ -1,14 +1,80 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <title>Pokemon Stop Map</title>
-        <meta http-equiv='Content-Type' content='text/html; charset=utf-8'/>
-    </head>
-    <body>
-        <div id='printoutPanel'></div>
-        
-        <div id='stopMap' style='width: 100vw; height: 100vh;'></div>
+<html lang="en">
+<head>
+   <title>mypokemon.io -- Your Pokemon Map</title>
+   <meta http-equiv='Content-Type' content='text/html; charset=utf-8'/>
+   <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+   <script>
+(adsbygoogle = window.adsbygoogle || []).push({
+         google_ad_client: "ca-pub-7776910507991738",
+             enable_page_level_ads: true
+               });
+   </script>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+  <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+  <style>
+    /* Set height of the grid so .sidenav can be 100% (adjust if needed) */
+    .row.content {height: 100%}
+    
+    /* Set gray background color and 100% height */
+    .sidenav {
+      background-color: #f1f1f1;
+      height: 100%;
+    }
+    
+    /* Set black background color, white text and some padding */
+    footer {
+      background-color: #555;
+      color: white;
+      padding: 15px;
+    }
+    
+    /* On small screens, set height to 'auto' for sidenav and grid */
+    @media screen and (max-width: 767px) {
+      .sidenav {
+        height: auto;
+        padding: 15px;
+      }
+      .row.content {height: auto;}
+    }
+  </style>
+</head>
+<body>
+
+<div class="container-fluid">
+  <div class="row content">
+    <div class="col-sm-3 sidenav">
+      <h3>mypokemon.io</h3>
+      <h4> -- Your Pokemon Map</h4>
+      <ul class="nav nav-pills nav-stacked">
+        <li><button class="btn btn-default" onclick="query_pokemon()">Pokemon</button></li>
+        <li><button class="btn btn-default" onclick="query_fort()">Pokestop and Gym</li>
+      </ul><br>
+      <div class="input-group">
+        <input type="text" class="form-control" placeholder="Search location">
+        <span class="input-group-btn">
+          <button class="btn btn-default" type="button">
+            <span class="glyphicon glyphicon-search"></span>
+          </button>
+        </span>
+      </div>
+    </div>
+
+    <div  class="col-sm-9">
+        <div id="stopMap" style="min-height: 300px;height:100vh" class="col-sm-10">
+        </div>
+    </div>
+  </div>
+</div>
+
         <script type='text/javascript'>
+            var query_type = "pokemon"
+            var map = undefined
+
             var now_time = (new Date).getTime() / 1000;
             function get_pushpin_from_map_item(map_item) {
                 var icon_url = undefined;
@@ -34,7 +100,7 @@
 
             function loadMapScenario() {
                 // init map
-                var map = new Microsoft.Maps.Map(document.getElementById('stopMap'), {
+                map = new Microsoft.Maps.Map(document.getElementById('stopMap'), {
                     credentials: 'AjDchhYNn7_bhP8UG8iRnhGEk3gq4wl7hxkORwk3eJa9HWFONQERXGMglVEQ0pPw',
                     enableClickableLogo: false,
                     enableSearchLogo: false,
@@ -63,49 +129,68 @@
 
                 }
 
-                function update_map(map) {
-
-                    // Query pokemon stops
-                    bounds = map.getBounds()
-                    northWest = bounds.getNorthwest()
-                    southEast = bounds.getSoutheast()
-
-                    var xhttp = new XMLHttpRequest()
-                    xhttp.onreadystatechange = function() {
-                      if (xhttp.readyState == 4 && xhttp.status == 200) {
-                        var layer = new Microsoft.Maps.Layer();
-                        // parse map items to pins
-                        item_list = JSON.parse(xhttp.responseText);
-                        for (var i in item_list) {
-                           var item = item_list[i];
-                           if (item["latitude"] === undefined) {
-                                continue;
-                           }
-                           var pushpin = get_pushpin_from_map_item(item)
-                           layer.add(pushpin)
-                        }
-
-                        // Update map with latest pins
-                        map.layers.clear();
-                        map.layers.insert(layer);
-                      }
-                    };
-                    query_url = ("/query/pokemon?" + "west=" + northWest.longitude
-                               + "&north=" + northWest.latitude
-                               + "&east=" + southEast.longitude
-                               + "&south=" + southEast.latitude);
-                    xhttp.open("GET", query_url, true);
-                    xhttp.send();
-                }
 
                 // Update the view changed counter after 2 seconds each time
                 Microsoft.Maps.Events.addThrottledHandler(map, 'viewchangeend', function () {
                     update_map(map)
                 }, 2000);
             }
+
+            function update_map() {
+
+                // Query pokemon stops
+                bounds = map.getBounds()
+                northWest = bounds.getNorthwest()
+                southEast = bounds.getSoutheast()
+
+                var xhttp = new XMLHttpRequest()
+                xhttp.onreadystatechange = function() {
+                  if (xhttp.readyState == 4 && xhttp.status == 200) {
+                    var layer = new Microsoft.Maps.Layer();
+                    // parse map items to pins
+                    item_list = JSON.parse(xhttp.responseText);
+                    for (var i in item_list) {
+                       var item = item_list[i];
+                       if (item["latitude"] === undefined) {
+                            continue;
+                       }
+                       var pushpin = get_pushpin_from_map_item(item)
+                       layer.add(pushpin)
+                    }
+
+                    // Update map with latest pins
+                    map.layers.clear();
+                    map.layers.insert(layer);
+                  }
+                };
+                query_url = ("/query/" + query_type + "?west=" + northWest.longitude
+                           + "&north=" + northWest.latitude
+                           + "&east=" + southEast.longitude
+                           + "&south=" + southEast.latitude);
+                xhttp.open("GET", query_url, true);
+                xhttp.send();
+            }
+
+
+            function query_pokemon() {
+                query_type = "pokemon";
+                update_map();
+            }
+            function query_fort() {
+                query_type= "fort"
+                update_map();
+            }
+
         </script>
         <script type='text/javascript' src='http://www.bing.com/api/maps/mapcontrol?branch=release&callback=loadMapScenario' async defer></script>
         <div>Icons made by <a href="http://www.freepik.com" title="Freepik">Freepik</a> from <a href="http://www.flaticon.com" title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div>
 
-    </body>
+<footer class="container-fluid">
+  <p></p>
+</footer>
+
+</body>
 </html>
+
+
+
