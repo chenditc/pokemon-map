@@ -102,7 +102,7 @@ class PokemonFortDB(object):
                         "and longitude < %s " + 
                         "and latitude > %s " + 
                         "and latitude < %s " +
-                     "ORDER BY lure_expire, fortid limit 200",
+                     "ORDER BY lure_expire DESC, fortid DESC limit 200",
                 (west, east, south, north))
         rows = cur.fetchall()
         forts = []
@@ -110,7 +110,7 @@ class PokemonFortDB(object):
             forts.append({ "latitude": row[0],
                               "longitude" : row[1],
                               "forttype" : row[2],
-                              "lure_expire" : row[3],
+                              "lure" : row[3],
                               "gymteam" : row[4]
                             })
         return forts

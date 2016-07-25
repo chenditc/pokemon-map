@@ -9,26 +9,24 @@
         
         <div id='stopMap' style='width: 100vw; height: 100vh;'></div>
         <script type='text/javascript'>
-           function get_pushpin_from_fort(fort) {
-               var pushpin = undefined;
-               if (fort["gymteam"] !== null) {
-                   pushpin = new Microsoft.Maps.Pushpin(
-                           new Microsoft.Maps.Location(fort["latitude"], fort["longitude"]), 
-                           { icon: 'https://s3-us-west-2.amazonaws.com/pokemon-map/icons/pharmacy-icon' + fort["gymteam"] + '.png',
-                             height: 39,
-                             width: 25,
-                             anchor: new Microsoft.Maps.Point(12, 25) });
-               }
-               else {
-                   pushpin = new Microsoft.Maps.Pushpin(
-                           new Microsoft.Maps.Location(fort["latitude"], fort["longitude"]), 
-                           { icon: 'https://s3-us-west-2.amazonaws.com/pokemon-map/icons/pokeball.png',
-                             height: 20,
-                             width: 20,
-                             anchor: new Microsoft.Maps.Point(0, 0) });
-               }
-               return pushpin
-           }
+            var now_time = (new Date).getTime() / 1000;
+            function get_pushpin_from_fort(fort) {
+                var icon_url = undefined;
+                if (fort["gymteam"] !== null) {
+                    icon_url = 'https://s3-us-west-2.amazonaws.com/pokemon-map/icons/pharmacy-icon' + fort["gymteam"] + '.png';
+                }
+                else if (fort['lure'] > now_time) {
+                         icon_url = 'https://s3-us-west-2.amazonaws.com/pokemon-map/icons/pokeball_lure.png';
+                }
+                else {
+                     icon_url = 'https://s3-us-west-2.amazonaws.com/pokemon-map/icons/pokeball.png';
+                }
+                var pushpin = new Microsoft.Maps.Pushpin(
+                            new Microsoft.Maps.Location(fort["latitude"], fort["longitude"]), 
+                            { icon: icon_url,
+                              anchor: new Microsoft.Maps.Point(0, 0) });
+                return pushpin
+            }
 
 
             function loadMapScenario() {

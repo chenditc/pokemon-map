@@ -27,29 +27,28 @@ def index(request):
     p2 = s2sphere.LatLng.from_degrees(south, east);
     rect = s2sphere.LatLngRect.from_point_pair(p1, p2)
     area = rect.area() * 1000 * 1000
+
     # If area is too large, return nothing
-    if area > 0.85:
-        return HttpResponse(json.dumps([]))
+    if area < 0.85:
+        cover = s2sphere.RegionCoverer()
+        cover.max_cells = 200
+        cover.max_level = 15
+        cover.min_level = 15
+        cells = cover.get_covering(rect)
 
-    cover = s2sphere.RegionCoverer()
-    cover.max_cells = 200
-    cover.max_level = 15
-    cover.min_level = 15
-    cells = cover.get_covering(rect)
+        cell_ids = [ cell.id() for cell in cells ]
+        #cell_fort_key = [ "fort.{0}".format(cell_id) for cell_id in cell_ids ] 
+        #cell_fort_jsons = redis_client.mget(cell_fort_key)
 
-    cell_ids = [ cell.id() for cell in cells ]
-    cell_fort_key = [ "fort.{0}".format(cell_id) for cell_id in cell_ids ] 
-    cell_fort_jsons = redis_client.mget(cell_fort_key)
-
-    # Update expired forts
-    expired_cell_ids = []
-    forts = []
-    for i in range(len(cell_fort_jsons)):
-        if cell_fort_jsons[i] == None:
-            expired_cell_ids.append(cell_ids[i])
-        else:
-            forts += json.loads(cell_fort_jsons[i])
-    refresh_cells(expired_cell_ids)
+        ## Update expired forts
+        #expired_cell_ids = []
+        #forts = []
+        #for i in range(len(cell_fort_jsons)):
+        #    if cell_fort_jsons[i] == None:
+        #        expired_cell_ids.append(cell_ids[i])
+        #    else:
+        #        forts += json.loads(cell_fort_jsons[i])
+        refresh_cells(cell_ids)
 
     forts = db.query_forts(west, north, east, south)
 
