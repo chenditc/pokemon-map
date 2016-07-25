@@ -54,14 +54,6 @@
         <li><button class="btn btn-default" onclick="query_pokemon()">Pokemon</button></li>
         <li><button class="btn btn-default" onclick="query_fort()">Pokestop and Gym</li>
       </ul><br>
-      <div class="input-group">
-        <input type="text" class="form-control" placeholder="Search location">
-        <span class="input-group-btn">
-          <button class="btn btn-default" type="button">
-            <span class="glyphicon glyphicon-search"></span>
-          </button>
-        </span>
-      </div>
     </div>
 
     <div  class="col-sm-9">
@@ -133,7 +125,7 @@
                 // Update the view changed counter after 2 seconds each time
                 Microsoft.Maps.Events.addThrottledHandler(map, 'viewchangeend', function () {
                     update_map(map)
-                }, 2000);
+                }, 1000);
             }
 
             function update_map() {
