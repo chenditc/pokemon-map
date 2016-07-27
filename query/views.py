@@ -18,19 +18,13 @@ work_queue = boto3.resource('sqs', region_name='us-west-2').get_queue_by_name(Qu
 def refresh_cells(cell_ids):
     work_queue.send_message(MessageBody=json.dumps(cell_ids))
 
-def fort(request):
-    data = request.GET
-    west = float(data["west"])
-    north = float(data["north"])
-    east = float(data["east"])
-    south = float(data["south"])
-
+def refresh_fort(west, east, north, south):
     p1 = s2sphere.LatLng.from_degrees(north, west); 
     p2 = s2sphere.LatLng.from_degrees(south, east);
     rect = s2sphere.LatLngRect.from_point_pair(p1, p2)
     area = rect.area() * 1000 * 1000
 
-    # If area is too large, return nothing
+    # If area is too large, don't return 
     if area < 0.85:
         cover = s2sphere.RegionCoverer()
         cover.max_cells = 200
@@ -41,6 +35,34 @@ def fort(request):
         cell_ids = [ cell.id() for cell in cells ]
         refresh_cells(cell_ids)
 
+def refresh_pokemon(west, east, north, south):
+    p1 = s2sphere.LatLng.from_degrees(north, west); 
+    p2 = s2sphere.LatLng.from_degrees(south, east);
+    rect = s2sphere.LatLngRect.from_point_pair(p1, p2)
+    area = rect.area() * 1000 * 1000
+
+    # If area is too large, return nothing
+    if area < 0.85:
+        cover = s2sphere.RegionCoverer()
+        cover.max_cells = 200
+        cover.max_level = 15
+        cover.min_level = 16
+        cells = cover.get_covering(rect)
+
+        cell_ids = [ cell.id() for cell in cells ]
+        refresh_cells(cell_ids)
+
+
+
+
+def fort(request):
+    data = request.GET
+    west = float(data["west"])
+    north = float(data["north"])
+    east = float(data["east"])
+    south = float(data["south"])
+
+    refresh_fort(west, east, north, south)
     forts = db.query_forts(west, north, east, south)
 
     return HttpResponse(json.dumps(forts))
@@ -52,21 +74,7 @@ def pokemon(request):
     east = float(data["east"])
     south = float(data["south"])
 
-    p1 = s2sphere.LatLng.from_degrees(north, west); 
-    p2 = s2sphere.LatLng.from_degrees(south, east);
-    rect = s2sphere.LatLngRect.from_point_pair(p1, p2)
-    area = rect.area() * 1000 * 1000
-
-    # If area is too large, return nothing
-    if area < 0.85:
-        cover = s2sphere.RegionCoverer()
-        cover.max_cells = 200
-        cover.max_level = 15
-        cover.min_level = 15
-        cells = cover.get_covering(rect)
-
-        cell_ids = [ cell.id() for cell in cells ]
-        refresh_cells(cell_ids)
+    refresh_pokemon(west, east, north, south)
 
     pokemons = db.query_pokemon(west, north, east, south)
 
