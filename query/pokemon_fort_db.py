@@ -1,15 +1,21 @@
 import time
+import os
 
 import psycopg2
 import s2sphere
 
 class PokemonFortDB(object):
     def __init__(self):
-        self.conn = psycopg2.connect(host="pokemon-fort-dev.cafr6s1nfibs.us-west-2.rds.amazonaws.com", 
+        rds_host = os.environ.get("RDS_HOST","pokemon-fort-dev.cafr6s1nfibs.us-west-2.rds.amazonaws.com" )
+        rds_user = os.environ.get("RDS_USER", "pokemon_fort")
+        rds_password = os.environ.get("RDS_PASSWORD", "pokemon_fort")
+        rds_database = os.environ.get("RDS_DATABASE", "pokemon_fort_dev")
+
+        self.conn = psycopg2.connect(host=rds_host, 
                                      port=5432, 
-                                     user="pokemon_fort",
-                                     password="pokemon_fort",
-                                     database="pokemon_fort_dev")
+                                     user=rds_user,
+                                     password=rds_password,
+                                     database=rds_database)
 
 ############################################################################################################
 # Web API 
