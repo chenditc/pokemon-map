@@ -28,7 +28,7 @@ if os.environ.get('ENV') == "DEV":
     ALLOWED_HOSTS = []
 else:
     DEBUG = False
-    ALLOWED_HOSTS = ["*.mypokemon.io", "mypokemon.io"]
+    ALLOWED_HOSTS = ["*.mypokemon.io", "mypokemon.io", "*.elasticbeanstalk.com"]
 
 # Application definition
 
