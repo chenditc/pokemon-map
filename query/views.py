@@ -1,3 +1,4 @@
+import os
 import json
 import itertools
 
@@ -9,9 +10,10 @@ import redis
 
 import pokemon_fort_db
 
+SQS_QUEUE_NAME = os.environ.get("SQS_QUEUE_NAME", "awseb-e-h66tqvpuym-stack-AWSEBWorkerQueue-1X04PKYR2KY9D")
+
 db = pokemon_fort_db.PokemonFortDB()
-work_queue = boto3.resource('sqs', region_name='us-west-2').get_queue_by_name(QueueName='awseb-e-h66tqvpuym-stack-AWSEBWorkerQueue-1X04PKYR2KY9D')
-redis_client = redis.StrictRedis(host='mypokemon-io.qha7wz.ng.0001.usw2.cache.amazonaws.com', port=6379, db=0)
+work_queue = boto3.resource('sqs', region_name='us-west-2').get_queue_by_name(QueueName=SQS_QUEUE_NAME)
 
 def refresh_cells(cell_ids):
     work_queue.send_message(MessageBody=json.dumps(cell_ids))
@@ -37,17 +39,6 @@ def fort(request):
         cells = cover.get_covering(rect)
 
         cell_ids = [ cell.id() for cell in cells ]
-        #cell_fort_key = [ "fort.{0}".format(cell_id) for cell_id in cell_ids ] 
-        #cell_fort_jsons = redis_client.mget(cell_fort_key)
-
-        ## Update expired forts
-        #expired_cell_ids = []
-        #forts = []
-        #for i in range(len(cell_fort_jsons)):
-        #    if cell_fort_jsons[i] == None:
-        #        expired_cell_ids.append(cell_ids[i])
-        #    else:
-        #        forts += json.loads(cell_fort_jsons[i])
         refresh_cells(cell_ids)
 
     forts = db.query_forts(west, north, east, south)
@@ -75,17 +66,6 @@ def pokemon(request):
         cells = cover.get_covering(rect)
 
         cell_ids = [ cell.id() for cell in cells ]
-        #cell_fort_key = [ "fort.{0}".format(cell_id) for cell_id in cell_ids ] 
-        #cell_fort_jsons = redis_client.mget(cell_fort_key)
-
-        ## Update expired forts
-        #expired_cell_ids = []
-        #forts = []
-        #for i in range(len(cell_fort_jsons)):
-        #    if cell_fort_jsons[i] == None:
-        #        expired_cell_ids.append(cell_ids[i])
-        #    else:
-        #        forts += json.loads(cell_fort_jsons[i])
         refresh_cells(cell_ids)
 
     pokemons = db.query_pokemon(west, north, east, south)
