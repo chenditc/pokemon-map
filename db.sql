@@ -43,19 +43,3 @@ CREATE TABLE spawn_point_map(
 CREATE INDEX spawn_last_check_idx ON spawn_point_map (last_check);
 CREATE INDEX spawn_cellid_idx ON spawn_point_map (cellid);
 
-
-CREATE TABLE map_visit_record(
-       timestamp            DOUBLE PRECISION,
-       cellid               DOUBLE PRECISION,
-       last_check           DOUBLE PRECISION
-);
-CREATE INDEX vist_timestamp_idx ON map_visit_record (timestamp);
-CREATE INDEX map_cellid_idx ON map_visit_record (cellid);
-
-CREATE TABLE map_search_record(
-       cellid               DOUBLE PRECISION PRIMARY KEY,
-       timestamp           DOUBLE PRECISION
-);
-CREATE INDEX search_timestamp_idx ON map_visit_record (timestamp);
-CREATE INDEX search_cellid_idx ON map_visit_record (cellid);
-
