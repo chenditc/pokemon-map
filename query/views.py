@@ -15,45 +15,27 @@ SQS_QUEUE_NAME = os.environ.get("SQS_QUEUE_NAME", "awseb-e-h66tqvpuym-stack-AWSE
 db = pokemon_fort_db.PokemonFortDB()
 work_queue = boto3.resource('sqs', region_name='us-west-2').get_queue_by_name(QueueName=SQS_QUEUE_NAME)
 
-def refresh_cells(cell_ids):
-    work_queue.send_message(MessageBody=json.dumps(cell_ids))
+def parse_request(request):
+    data = request.GET
+    west = float(data["west"])
+    north = float(data["north"])
+    east = float(data["east"])
+    south = float(data["south"])
+    return { "west": west,
+             "north" : north,
+             "east" : east,
+             "south" : south }
 
-def refresh_fort(west, east, north, south):
-    p1 = s2sphere.LatLng.from_degrees(north, west); 
-    p2 = s2sphere.LatLng.from_degrees(south, east);
-    rect = s2sphere.LatLngRect.from_point_pair(p1, p2)
-    area = rect.area() * 1000 * 1000
+def refresh_cells(request):
+    work_queue.send_message(MessageBody=json.dumps(request))
 
-    # If area is too large, don't return 
-    if area < 0.85:
-        cover = s2sphere.RegionCoverer()
-        cover.max_cells = 200
-        cover.max_level = 15
-        cover.min_level = 15
-        cells = cover.get_covering(rect)
+def refresh_fort(request):
+    request["target"] = "fort"
+    refresh_cells(request)
 
-        cell_ids = [ cell.id() for cell in cells ]
-        refresh_cells(cell_ids)
-
-def refresh_pokemon(west, east, north, south):
-    p1 = s2sphere.LatLng.from_degrees(north, west); 
-    p2 = s2sphere.LatLng.from_degrees(south, east);
-    rect = s2sphere.LatLngRect.from_point_pair(p1, p2)
-    area = rect.area() * 1000 * 1000
-
-    # If area is too large, return nothing
-    if area < 0.85:
-        cover = s2sphere.RegionCoverer()
-        cover.max_cells = 200
-        cover.max_level = 15
-        cover.min_level = 16
-        cells = cover.get_covering(rect)
-
-        cell_ids = [ cell.id() for cell in cells ]
-        refresh_cells(cell_ids)
-
-
-
+def refresh_pokemon(request):
+    request["target"] = "pokemon"
+    refresh_cells(request)
 
 def fort(request):
     data = request.GET
@@ -62,10 +44,12 @@ def fort(request):
     east = float(data["east"])
     south = float(data["south"])
 
-    refresh_fort(west, east, north, south)
+    refresh_fort(parse_request(request))
     forts = db.query_forts(west, north, east, south)
 
     return HttpResponse(json.dumps(forts))
+
+
 
 def pokemon(request):
     data = request.GET
@@ -74,7 +58,7 @@ def pokemon(request):
     east = float(data["east"])
     south = float(data["south"])
 
-    refresh_pokemon(west, east, north, south)
+    refresh_pokemon(parse_request(request))
 
     pokemons = db.query_pokemon(west, north, east, south)
 
