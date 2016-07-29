@@ -43,3 +43,13 @@ CREATE TABLE spawn_point_map(
 CREATE INDEX spawn_last_check_idx ON spawn_point_map (last_check);
 CREATE INDEX spawn_cellid_idx ON spawn_point_map (cellid);
 
+CREATE TABLE searcher_account(
+       username       VARCHAR(64) PRIMARY KEY,
+       password       VARCHAR(64) ,
+       lastused     DOUBLE PRECISION,
+       failcount    INT
+);
+CREATE INDEX searcher_account_lastused_idx ON searcher_account (lastused);
+CREATE INDEX searcher_account_failcount_idx ON searcher_account (failcount);
+ALTER TABLE searcher_account ADD column logininfo VARCHAR(250);
+
