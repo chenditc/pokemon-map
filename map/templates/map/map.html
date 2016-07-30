@@ -121,15 +121,17 @@
                 else {
 
                 }
-
-
-                // Update the view changed counter after 2 seconds each time
-                Microsoft.Maps.Events.addThrottledHandler(map, 'viewchangeend', function () {
-                    update_map(map)
-                }, 1000);
             }
 
+            var last_update = new Date().getTime() / 1000;
+            var update_mark = false;
             function update_map() {
+                var now = new Date().getTime() / 1000;
+                if (now - last_update < 1) {
+                    return;
+                }
+                last_update = now
+                update_mark = true
 
                 // Query pokemon stops
                 bounds = map.getBounds()
@@ -138,6 +140,7 @@
 
                 var xhttp = new XMLHttpRequest()
                 xhttp.onreadystatechange = function() {
+                  update_mark = false
                   if (xhttp.readyState == 4 && xhttp.status == 200) {
                     var layer = new Microsoft.Maps.Layer();
                     // parse map items to pins
@@ -167,16 +170,15 @@
 
             function query_pokemon() {
                 query_type = "pokemon";
-                update_map();
             }
             function query_fort() {
                 query_type= "fort"
-                update_map();
             }
             function toggle_show_expire() {
                 show_expire = (show_expire === false);
-                update_map();
             }
+
+            window.setInterval(update_map, 2000)
 
         </script>
         <script type='text/javascript' src='http://www.bing.com/api/maps/mapcontrol?branch=release&callback=loadMapScenario' async defer></script>
