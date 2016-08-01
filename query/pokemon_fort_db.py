@@ -41,6 +41,45 @@ class PokemonFortDB(object):
                             })
         return forts
 
+    def query_pokestop(self, west, north, east, south):
+        cur = self.conn.cursor()
+        cur.execute("SELECT latitude, longitude, lure_expire FROM fort_map " + 
+                    "WHERE longitude > %s " + 
+                        "and longitude < %s " + 
+                        "and latitude > %s " + 
+                        "and latitude < %s " +
+                        "and forttype = 1 " +
+                     "ORDER BY lure_expire DESC, fortid DESC limit 200",
+                (west, east, south, north))
+        rows = cur.fetchall()
+        forts = []
+        for row in rows:
+            forts.append({ "latitude": row[0],
+                              "longitude" : row[1],
+                              "lure" : row[2],
+                            })
+        return forts
+
+    def query_gym(self, west, north, east, south):
+        cur = self.conn.cursor()
+        cur.execute("SELECT latitude, longitude, gymteam FROM fort_map " + 
+                    "WHERE longitude > %s " + 
+                        "and longitude < %s " + 
+                        "and latitude > %s " + 
+                        "and latitude < %s " +
+                        "and gymteam > 0 " +
+                     "ORDER BY fortid DESC limit 200",
+                (west, east, south, north))
+        rows = cur.fetchall()
+        forts = []
+        for row in rows:
+            forts.append({ "latitude": row[0],
+                              "longitude" : row[1],
+                              "gymteam" : row[2],
+                            })
+        return forts
+
+
     def query_pokemon(self, west, north, east, south):
         now = time.time() * 1000
         cur = self.conn.cursor()

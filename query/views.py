@@ -38,29 +38,51 @@ def refresh_pokemon(request):
     refresh_cells(request)
 
 def fort(request):
-    data = request.GET
+    data = parse_request(request)
     west = float(data["west"])
     north = float(data["north"])
     east = float(data["east"])
     south = float(data["south"])
 
-    refresh_fort(parse_request(request))
+    refresh_fort(data)
     forts = db.query_forts(west, north, east, south)
 
     return HttpResponse(json.dumps(forts))
 
-
-
-def pokemon(request):
-    data = request.GET
+def pokestop(request):
+    data = parse_request(request)
     west = float(data["west"])
     north = float(data["north"])
     east = float(data["east"])
     south = float(data["south"])
 
-    refresh_pokemon(parse_request(request))
+    refresh_fort(data)
+    pokestops = db.query_pokestop(west, north, east, south)
+
+    return HttpResponse(json.dumps(pokestops))
+
+def gym(request):
+    data = parse_request(request)
+    west = float(data["west"])
+    north = float(data["north"])
+    east = float(data["east"])
+    south = float(data["south"])
+
+    refresh_fort(data)
+    gyms = db.query_gym(west, north, east, south)
+
+    return HttpResponse(json.dumps(gyms))
+
+
+def pokemon(request):
+    data = parse_request(request)
+    west = float(data["west"])
+    north = float(data["north"])
+    east = float(data["east"])
+    south = float(data["south"])
+
+    refresh_pokemon(data)
 
     pokemons = db.query_pokemon(west, north, east, south)
 
     return HttpResponse(json.dumps(pokemons))
-
